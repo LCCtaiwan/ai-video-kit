@@ -1,0 +1,353 @@
+{
+ "title_zh": "林投姐",
+ "title_en": "The Lady of the Pandanus Grove",
+ "note": "每個 line：kind=narr 為華語旁白；kind=tw 為台語台詞（tl 為台羅，供 TTS）。scene 對應 render.html 的場景。pad 為該句結束後的停頓秒數。 t00 為開場鉤子：黑畫面中先聽到林投姐的台語問句（倒敘預告），之後燈籠亮起、畫面淡入。",
+ "lines": [
+  {
+   "id": "t00",
+   "scene": "night",
+   "kind": "tw",
+   "speaker": "lady",
+   "pad": 1.2,
+   "zh": "頭家，肉粽一粒偌濟錢？",
+   "tl": "Thâu-ke, bah-tsàng tsi̍t lia̍p guā-tsē tsînn?",
+   "en": "Sir... how much for a zongzi?",
+   "hook": true
+  },
+  {
+   "id": "n01",
+   "scene": "night",
+   "kind": "narr",
+   "pad": 0.6,
+   "zh": "清朝咸豐年間，台南府城東門外。",
+   "en": "Tainan, during the Xianfeng reign of the Qing dynasty. Outside the East Gate."
+  },
+  {
+   "id": "n02",
+   "scene": "night",
+   "kind": "narr",
+   "pad": 0.5,
+   "zh": "夜深了，一個賣肉粽的小販，提著燈籠，走過林投樹林。",
+   "en": "Late at night, a zongzi peddler walks past the pandanus grove with his lantern."
+  },
+  {
+   "id": "t01",
+   "scene": "lady",
+   "kind": "tw",
+   "speaker": "lady",
+   "pad": 0.5,
+   "zh": "頭家，肉粽一粒偌濟錢？",
+   "tl": "Thâu-ke, bah-tsàng tsi̍t lia̍p guā-tsē tsînn?",
+   "en": "Sir... how much for a zongzi?"
+  },
+  {
+   "id": "n03",
+   "scene": "lady",
+   "kind": "narr",
+   "pad": 0.5,
+   "zh": "一個白衣女子，低著頭，從樹影裡走出來。",
+   "en": "A woman in white steps out of the shadows, her head bowed."
+  },
+  {
+   "id": "n04",
+   "scene": "lady",
+   "kind": "narr",
+   "pad": 0.7,
+   "zh": "她每晚都來，買了肉粽，就消失在林投樹後。",
+   "en": "She comes every night, buys a zongzi, and vanishes behind the trees."
+  },
+  {
+   "id": "n05",
+   "scene": "paper",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "直到某天清晨，小販打開錢筒——",
+   "en": "Until one morning, the peddler opens his money box..."
+  },
+  {
+   "id": "n06",
+   "scene": "paper",
+   "kind": "narr",
+   "pad": 1.2,
+   "zh": "裡面的銅錢，全變成了冥紙。",
+   "en": "...and every copper coin has turned into joss paper for the dead."
+  },
+  {
+   "id": "n07",
+   "scene": "title",
+   "kind": "narr",
+   "pad": 1.0,
+   "zh": "她是誰？故事，要從幾年前說起。",
+   "en": "Who was she? The story begins years earlier."
+  },
+  {
+   "id": "n08",
+   "scene": "widow",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "府城有位寡婦，名叫李昭娘。",
+   "en": "In the city lived a widow named Li Zhao-niang."
+  },
+  {
+   "id": "n09",
+   "scene": "widow",
+   "kind": "narr",
+   "pad": 0.7,
+   "zh": "丈夫病逝，留下一筆家產，她獨自拉拔三個孩子。",
+   "en": "Her husband had died, leaving her a fortune and three children to raise alone."
+  },
+  {
+   "id": "n10",
+   "scene": "suitor_arrive",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "這時，一個從唐山來的商人周亞思，出現在她面前。",
+   "en": "Then a merchant from the mainland, Zhou Ya-si, appeared at her door."
+  },
+  {
+   "id": "n11a",
+   "scene": "suitor",
+   "kind": "narr",
+   "pad": 0.5,
+   "zh": "他甜言蜜語，說要娶她、一起做生意。",
+   "en": "With sweet words, he promised marriage and a business together."
+  },
+  {
+   "id": "n11b",
+   "scene": "suitor",
+   "kind": "narr",
+   "pad": 0.7,
+   "zh": "昭娘，把全部家當都交給了他。",
+   "en": "And Zhao-niang gave him everything she had."
+  },
+  {
+   "id": "n12",
+   "scene": "ship",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "周亞思說要回唐山辦貨，船一開，就再也沒有回來。",
+   "en": "He sailed home to buy goods, he said. The ship left, and never returned."
+  },
+  {
+   "id": "n13",
+   "scene": "ship",
+   "kind": "narr",
+   "pad": 0.8,
+   "zh": "後來才聽說，他在汕頭，早已另有妻室。",
+   "en": "Later she learned he already had a wife waiting in Shantou."
+  },
+  {
+   "id": "n14",
+   "scene": "despair",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "家財散盡，孩子們也沒能活下來。",
+   "en": "Her fortune was gone. Her children did not survive."
+  },
+  {
+   "id": "n15",
+   "scene": "despair",
+   "kind": "narr",
+   "pad": 1.4,
+   "zh": "一個風雨夜，昭娘走進東門外的林投樹林，再也沒有出來。",
+   "en": "One stormy night, she walked into the pandanus grove, and never came out."
+  },
+  {
+   "id": "n16",
+   "scene": "haunt",
+   "kind": "narr",
+   "pad": 2.4,
+   "zh": "從此，林投樹下夜夜傳出哭聲，人們叫她——林投姐。",
+   "en": "From then on, weeping was heard beneath the trees each night. People called her the Lady of the Pandanus.",
+   "chapter_break": true
+  },
+  {
+   "id": "n16b",
+   "scene": "taoist_pov",
+   "kind": "narr",
+   "pad": 0.5,
+   "zh": "直到有一天夜裡，一位從唐山來的術士，路過林投樹林。",
+   "en": "Then one night, a Taoist master from the mainland passed by the pandanus grove."
+  },
+  {
+   "id": "n16c",
+   "scene": "taoist_pov",
+   "kind": "narr",
+   "pad": 0.5,
+   "zh": "林子深處，隱隱傳來女人的哭聲。",
+   "en": "From deep in the grove came the faint sound of a woman weeping."
+  },
+  {
+   "id": "n16d",
+   "scene": "taoist_approach",
+   "kind": "narr",
+   "pad": 0.5,
+   "zh": "他提燈循聲走去，只見一個白衣女子，背對著他，站在林投樹下。",
+   "en": "Following the sound with his lantern, he found a woman in white, standing beneath a pandanus tree, her back to him."
+  },
+  {
+   "id": "t05",
+   "scene": "taoist_approach",
+   "kind": "tw",
+   "speaker": "lady",
+   "pad": 0.6,
+   "zh": "你……毋驚我？",
+   "tl": "Lí... m̄ kiann guá?",
+   "en": "You... are not afraid of me?"
+  },
+  {
+   "id": "n16e",
+   "scene": "taoist_meet",
+   "kind": "narr",
+   "pad": 0.6,
+   "zh": "術士沒有逃，反而問她為何在此哭泣。她便把被騙的經過，一五一十說了出來。",
+   "en": "He did not flee. He asked why she wept, and she told him everything: how she had been deceived."
+  },
+  {
+   "id": "n16f",
+   "scene": "taoist",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "說完，她跪了下來。",
+   "en": "Then she knelt before him."
+  },
+  {
+   "id": "t04",
+   "scene": "taoist",
+   "kind": "tw",
+   "speaker": "lady",
+   "pad": 0.6,
+   "zh": "師父，求你𤆬我過海，我欲討一个公道。",
+   "tl": "Sai-hū, kiû lí tshuā guá kuè-hái, guá beh thó tsi̍t ê kong-tō.",
+   "en": "Master... please take me across the sea. I want justice."
+  },
+  {
+   "id": "n17",
+   "scene": "umbrella_in",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "術士聽完她的遭遇，答應幫她，讓她的魂魄藏進一把油紙傘裡。",
+   "en": "Moved by her story, he agreed, and let her spirit hide inside an oil-paper umbrella."
+  },
+  {
+   "id": "n18",
+   "scene": "umbrella",
+   "kind": "narr",
+   "pad": 0.6,
+   "zh": "術士一路帶著這把傘，渡過黑水溝，來到汕頭。",
+   "en": "He carried the umbrella across the Black Ditch strait, all the way to Shantou."
+  },
+  {
+   "id": "n18b",
+   "scene": "zhou_house",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "到了汕頭，術士四處打聽，找到了周亞思。",
+   "en": "In Shantou, the master asked around, and found Zhou Ya-si."
+  },
+  {
+   "id": "n18c",
+   "scene": "zhou_house",
+   "kind": "narr",
+   "pad": 0.6,
+   "zh": "他靠著昭娘的錢開了大商號，娶妻生子，日子過得風光。",
+   "en": "With Zhao-niang's money he had opened a grand shop, married, had children, and lived in comfort."
+  },
+  {
+   "id": "n18d",
+   "scene": "umbrella_door",
+   "kind": "narr",
+   "pad": 0.7,
+   "zh": "那天深夜，術士在周家門口撐開了油紙傘，一縷白煙鑽進了門縫。",
+   "en": "Late that night, the master opened the umbrella at Zhou's door, and a wisp of white smoke slipped through the crack."
+  },
+  {
+   "id": "n18e",
+   "scene": "counting",
+   "kind": "narr",
+   "pad": 0.5,
+   "zh": "屋裡，周亞思正在燈下算帳，燈火忽然變成藍色。",
+   "en": "Inside, Zhou was counting his money by lamplight, when the flame turned blue."
+  },
+  {
+   "id": "t06",
+   "scene": "counting",
+   "kind": "tw",
+   "speaker": "lady",
+   "pad": 0.8,
+   "zh": "頭家……肉粽一粒偌濟錢？",
+   "tl": "Thâu-ke... bah-tsàng tsi̍t lia̍p guā-tsē tsînn?",
+   "en": "Sir... how much for a zongzi?"
+  },
+  {
+   "id": "t02",
+   "scene": "revenge",
+   "kind": "tw",
+   "speaker": "lady",
+   "pad": 0.4,
+   "zh": "周亞思，你欠我的，今仔日愛還！",
+   "tl": "Tsiu A-su, lí khiàm guá--ê, kin-á-ji̍t ài hîng!",
+   "en": "Zhou Ya-si... today you pay what you owe me!"
+  },
+  {
+   "id": "n19a",
+   "scene": "beg",
+   "kind": "narr",
+   "pad": 0.4,
+   "zh": "周亞思跪在地上，拚命磕頭求饒。",
+   "en": "Zhou fell to his knees, begging for mercy."
+  },
+  {
+   "id": "t07",
+   "scene": "beg",
+   "kind": "tw",
+   "speaker": "zhou",
+   "pad": 0.5,
+   "zh": "昭娘，是我毋著，饒我一條命！",
+   "tl": "Tsiau-niû, sī guá m̄-tio̍h, jiâu guá tsi̍t tiâu miā!",
+   "en": "Zhao-niang, I was wrong! Spare my life!"
+  },
+  {
+   "id": "n19b",
+   "scene": "beg",
+   "kind": "narr",
+   "pad": 1.0,
+   "zh": "林投姐一句話也沒有說。燈火，熄了。",
+   "en": "She said nothing at all. The lamp went out."
+  },
+  {
+   "id": "n19",
+   "scene": "funeral",
+   "kind": "narr",
+   "pad": 1.0,
+   "zh": "幾天後，周家大門貼上了白紙。人們說，周亞思發了瘋，在驚恐中死去。",
+   "en": "Days later, white mourning paper hung on Zhou's gate. People said he had gone mad, and died in terror."
+  },
+  {
+   "id": "n20",
+   "scene": "end",
+   "kind": "narr",
+   "pad": 0.5,
+   "zh": "直到今天，台南人仍會說起——",
+   "en": "To this day, people in Tainan still speak of her..."
+  },
+  {
+   "id": "n21",
+   "scene": "end",
+   "kind": "narr",
+   "pad": 0.6,
+   "zh": "深夜裡，林投樹下，那個來買肉粽的女人。",
+   "en": "the woman who comes, late at night, beneath the pandanus trees, to buy a zongzi."
+  },
+  {
+   "id": "t03",
+   "scene": "end",
+   "kind": "tw",
+   "speaker": "lady",
+   "pad": 2.5,
+   "zh": "頭家……肉粽，閣有無？",
+   "tl": "Thâu-ke... bah-tsàng, koh ū--bô?",
+   "en": "Sir... any zongzi left?"
+  }
+ ]
+}
