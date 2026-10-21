@@ -1,0 +1,611 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>AI 動畫製作手冊</title>
+<meta name="description" content="一個藥師用 AI agent 做醫療教學動畫的完整做法，附可直接帶回去用的規則檔（skills）。">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 版面：左側固定目錄＋右側長文；窄螢幕時目錄收成頂部橫捲列。
+   配色取自林投姐影片實測——淺色是紙雕的紙，深色是夜戲。 */
+:root{
+  --paper:#f2ece1;        /* 紙：#acafaf 偏暖 */
+  --ink:#1b1a17;
+  --ink-2:#55514a;
+  --ink-3:#8a847a;
+  --rule:#ddd4c4;
+  --card:#e9e1d3;
+  --lantern:#9c6b12;      /* 燈籠金，壓到紙上可讀 */
+  --ghost:#1f6b74;        /* 鬼魂青 */
+  --blood:#a33b31;
+  --code:#e4dac7;
+  --f-d:"Noto Serif TC",Georgia,"Songti TC",serif;
+  --f-b:"Noto Sans TC","PingFang TC",-apple-system,sans-serif;
+  --f-m:ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#090c10; --ink:#e7e4dc; --ink-2:#9aa7ae; --ink-3:#7f8e98;
+  --rule:#2c3b45; --card:#19232e; --code:#141c24;
+  --lantern:#e1b846; --ghost:#63a4ac; --blood:#d16a5e;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#090c10; --ink:#e7e4dc; --ink-2:#9aa7ae; --ink-3:#7f8e98;
+  --rule:#2c3b45; --card:#19232e; --code:#141c24;
+  --lantern:#e1b846; --ghost:#63a4ac; --blood:#d16a5e;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-b);
+  font-size:16px;line-height:1.75;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:0 72px;
+  display:grid;grid-template-columns:232px minmax(0,1fr);gap:48px;align-items:start}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:0}}
+
+/* 頁首 */
+.top{grid-column:1/-1;padding-block:40px 28px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:var(--f-m);font-size:12px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--f-d);font-weight:900;font-size:clamp(30px,5.2vw,46px);
+  line-height:1.15;margin:.3em 0 0;text-wrap:balance}
+.sub{color:var(--ink-2);margin:.7em 0 0;max-width:46ch}
+
+/* 目錄 */
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);
+  padding-block:28px;font-size:14px}
+@media (max-width:860px){
+  nav{position:static;padding-block:16px 0;border-bottom:1px solid var(--rule)}
+  nav ol{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;
+    scrollbar-width:thin}
+  nav li{white-space:nowrap}
+  nav a{border:1px solid var(--rule);border-radius:999px;padding:4px 11px}
+  nav a::before{display:none}
+}
+nav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+nav a{color:var(--ink-2);text-decoration:none;display:block;padding:3px 0;
+  position:relative}
+nav a::before{content:attr(data-n);font-family:var(--f-m);font-size:11px;
+  color:var(--ink-3);margin-right:9px}
+nav a:hover,nav a:focus-visible{color:var(--lantern)}
+
+main{padding-block:28px;min-width:0}
+section{margin-bottom:56px;scroll-margin-top:24px}
+h2{font-family:var(--f-d);font-weight:700;font-size:26px;line-height:1.3;
+  margin:0 0 .2em;text-wrap:balance}
+h2 .n{font-family:var(--f-m);font-size:13px;color:var(--lantern);
+  display:block;letter-spacing:.14em;margin-bottom:.5em}
+h3{font-family:var(--f-d);font-weight:700;font-size:18px;margin:2em 0 .4em}
+p{margin:.8em 0;max-width:68ch}
+ul,ol{max-width:68ch;padding-left:1.3em}
+li{margin:.35em 0}
+b,strong{font-weight:700}
+em{font-style:normal;color:var(--lantern);font-weight:500}
+a{color:var(--ghost)}
+hr{border:0;border-top:1px solid var(--rule);margin:2.4em 0}
+
+/* 重點框 */
+.key{border-left:3px solid var(--lantern);background:var(--card);
+  padding:14px 18px;margin:1.3em 0;max-width:68ch;border-radius:0 6px 6px 0}
+.key p{margin:.35em 0}
+.key.cold{border-left-color:var(--ghost)}
+.key.hot{border-left-color:var(--blood)}
+.key .lbl{font-family:var(--f-m);font-size:11px;letter-spacing:.12em;
+  color:var(--ink-3);text-transform:uppercase;display:block;margin-bottom:.4em}
+
+/* 程式碼／資料 */
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;
+  padding:14px 16px;overflow-x:auto;font-family:var(--f-m);font-size:13px;
+  line-height:1.7;margin:1.2em 0}
+code{font-family:var(--f-m);font-size:.9em;background:var(--card);
+  padding:.12em .4em;border-radius:3px}
+pre code{background:none;padding:0;font-size:inherit}
+p code,li code,td code{overflow-wrap:anywhere}
+
+/* 表格 */
+.tw{overflow-x:auto;margin:1.2em 0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:440px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+th{font-weight:500;font-size:12.5px;letter-spacing:.07em;color:var(--ink-3);
+  text-transform:uppercase;white-space:nowrap}
+td.n{font-family:var(--f-m);font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+
+/* 判例卡 */
+.rule{border:1px solid var(--rule);border-radius:6px;padding:14px 16px;
+  margin:.9em 0;max-width:68ch;background:var(--card)}
+.rule .id{font-family:var(--f-m);font-size:12px;color:var(--lantern);
+  font-weight:500;letter-spacing:.08em}
+.rule h4{font-family:var(--f-d);font-size:16px;margin:.25em 0 .5em;font-weight:700}
+.rule dl{margin:0;font-size:14.5px}
+.rule dt{font-family:var(--f-m);font-size:11.5px;color:var(--ink-3);
+  letter-spacing:.08em;margin-top:.6em;text-transform:uppercase}
+.rule dd{margin:.1em 0 0}
+
+.note{font-size:14px;color:var(--ink-2);max-width:68ch}
+.foot{grid-column:1/-1;border-top:1px solid var(--rule);padding-top:20px;
+  font-size:13.5px;color:var(--ink-3)}
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">從民間故事到醫療指引　·　演講講不完的部分</div>
+  <h1>AI 動畫製作手冊</h1>
+  <p class="sub">一個藥師用 AI agent 做醫療教學動畫的完整做法。演講只講了「你要做什麼」，這份手冊收的是「它背後怎麼運作」——回去真的要動手時才會用到。</p>
+</header>
+
+<nav aria-label="目錄">
+  <ol>
+    <li><a href="#flow" data-n="01">全流程</a></li>
+    <li><a href="#script" data-n="02">腳本</a></li>
+    <li><a href="#voice" data-n="03">配音</a></li>
+    <li><a href="#timeline" data-n="04">時間軸</a></li>
+    <li><a href="#art" data-n="05">生圖</a></li>
+    <li><a href="#motion" data-n="06">動畫五層</a></li>
+    <li><a href="#rules" data-n="07">判例準則</a></li>
+    <li><a href="#qc" data-n="08">檢查</a></li>
+    <li><a href="#spec" data-n="09">視覺規格</a></li>
+    <li><a href="#styles" data-n="10">風格包</a></li>
+    <li><a href="#pits" data-n="11">踩過的坑</a></li>
+    <li><a href="#res" data-n="12">資源</a></li>
+    <li><a href="#gloss" data-n="13">名詞對照</a></li>
+    <li><a href="#kit" data-n="14">規則檔帶回去</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="flow">
+  <h2><span class="n">01</span>全流程：七步，與誰做什麼</h2>
+  <p>每一步都是同一個循環：<em>提方案 → 你選 → 派工 → 檢查 → 你看 → 修改</em>。</p>
+  <div class="tw"><table>
+    <thead><tr><th>步驟</th><th>你做</th><th>agent／程式做</th></tr></thead>
+    <tbody>
+      <tr><td>1　腳本</td><td>決定講什麼、每句講一件事、縮寫唸法</td><td>寫初稿、查證、整理成資料</td></tr>
+      <tr><td>2　配音</td><td>選聲音、<b>戴耳機聽過</b></td><td>合成、切句、入庫</td></tr>
+      <tr><td>3　時間軸</td><td>不用做</td><td>逐詞對時，產生所有時間點</td></tr>
+      <tr><td>4　生圖</td><td>從 3 種畫風選 1 種</td><td>生圖、放大、去背、切件</td></tr>
+      <tr><td>5　鏡頭與渲染</td><td>看靜圖、說哪裡不好看</td><td>寫動畫程式、逐格算、出片</td></tr>
+      <tr><td>6　自動檢查</td><td>不用做</td><td>擋住「一定錯」的六類</td></tr>
+      <tr><td>7　看片修改</td><td><b>「時間＋問題」條列</b></td><td>照單修改</td></tr>
+    </tbody>
+  </table></div>
+  <div class="key cold">
+    <span class="lbl">誰寫程式：有證據的與沒試過的</span>
+    <p>實際跑完三個專案的組合是 <b>Claude Code 派工＋Codex 寫程式＋Gemini 生圖與配音</b>。
+    Codex 這一塊有 17 份任務單與 14 筆 commit 可查。</p>
+    <p>只有 ChatGPT 的話，Codex 本來就是它的；只有 Claude 的話，Claude Code 可以一手包辦，生圖改用免費額度或純程式風格包。
+    <b>只有 Gemini 的情況沒有實測過</b>——Gemini 在這些專案裡負責的是配音、配樂與生圖，不是寫程式。要走這條路請自己先試。</p>
+  </div>
+  <div class="key">
+    <span class="lbl">這套流程裡沒有「剪接」這一步</span>
+    <p>傳統是拍素材 → 剪輯軟體排時間軸 → 剪。這套是配音 → 自動對時 → 程式照著時間軸把每一格<b>算</b>出來。畫面是算出來的，不是剪出來的。唯一接近剪接的只有最後混音，一行指令。</p>
+  </div>
+</section>
+
+<section id="script">
+  <h2><span class="n">02</span>腳本：一句只講一件事</h2>
+  <p>腳本是一個資料檔，每句標 id、場景、語言、中文、英文、句後停頓。台語另外標拼音。旗標 <code>hook</code> 標開場鉤子、<code>chapter_break</code> 標章節斷點。</p>
+  <pre><code>{
+  "id": "n03",
+  "scene": "curve",
+  "kind": "narr",
+  "zh": "第一秒吹出來的量，叫做 FEV1。",
+  "en": "The volume blown out in the first second is the FEV1.",
+  "pad": 0.4
+}</code></pre>
+  <p><code>pad</code> 是句後停頓秒數。<b>留白寫在腳本裡，不是之後剪出來的。</b></p>
+
+  <h3>科普敘事的五條文法</h3>
+  <ol>
+    <li><b>先判斷這一幕在做哪一種教學任務</b>——定義／步驟／比較／因果／分類／問題解答。每一種有自己的出場順序與停留時間，順序錯了觀眾看不懂。</li>
+    <li><b>畫面要「證明」旁白，不是裝飾旁白。</b>說「氣道變窄」就要真的看到管徑縮小，不是放一個氣喘的圖示。</li>
+    <li><b>閱讀時間</b>——畫面上的字要留夠時間讀完，這是可以算的，不是感覺。</li>
+    <li><b>抽象概念要具體化，而且選有過程的動作。</b>有過程才有東西可以動。</li>
+    <li><b>先留缺口再補上。</b>先讓人產生疑問再給答案；直接給答案的，聽完就忘了。</li>
+  </ol>
+  <p class="note">出處：<code>explainer-grammar.md</code>，改寫自 code-animation-explainer（MIT）。</p>
+
+  <h3>實例：一支 30 秒的片，六句</h3>
+  <p>這是 GOLD 第 0 堂第 74.92 秒到第 105.85 秒的原文，剛好 30.9 秒。</p>
+  <div class="tw"><table>
+    <thead><tr><th>句子</th><th>場景</th><th>停頓</th><th>唸法</th></tr></thead>
+    <tbody>
+      <tr><td>要確診 COPD，一定要做的檢查，叫做肺功能。</td><td>藥局</td><td class="n">0.5s</td><td>—</td></tr>
+      <tr><td>先深吸一口氣，再用最大的力氣，一口氣吹到底。</td><td>藥局</td><td class="n">0.4s</td><td>—</td></tr>
+      <tr><td>第一秒吹出來的量，叫做 FEV1。</td><td>曲線</td><td class="n">0.4s</td><td>F E V one</td></tr>
+      <tr><td>一路用力吹到吹不出來的總量，叫做 FVC。</td><td>曲線</td><td class="n">0.5s</td><td>—</td></tr>
+      <tr><td>把 FEV1 除以 FVC。健康的人，第一秒就能吹出大部分。</td><td>比值</td><td class="n">0.4s</td><td>F E V one</td></tr>
+      <tr><td>如果用藥後，比值仍小於 0.7，代表氣流阻塞，是確診 COPD 的必要條件。</td><td>比值</td><td class="n">1.0s</td><td>零點七</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="voice">
+  <h2><span class="n">03</span>配音：三件事，加一個反直覺的檢查</h2>
+
+  <h3>一　語氣要比喻一個人</h3>
+  <p>不要只寫形容詞。實際用的那一段：</p>
+  <div class="key cold">
+    <span class="lbl">voice_source.style 原文</span>
+    <p>Taiwanese Mandarin accent (台灣口音), like a kind senior hospital pharmacist teaching new pharmacists: warm, clear, natural rise and fall, medium-slow pace with natural pauses. <b>Not a broadcast voice, not a mainland China accent.</b> Read English abbreviations letter by letter in English.</p>
+  </div>
+  <p>它有三層，缺一層效果就差：<b>比喻一個具體的人</b>、<b>排除項</b>（不要播音腔、不要中國口音）、<b>處理規則</b>（縮寫逐字母唸）。</p>
+
+  <h3>二　縮寫先做一張唸法表</h3>
+  <p>送去配音前替換，<b>字幕照原文</b>。</p>
+  <pre><code>FEV1 → F E V one      COPD → C O P D      ICS → I C S
+FVC  → F V C          PEF  → P E F        0.7 → 零點七
+ICS-formoterol → I C S formoterol         2026 → 二零二六</code></pre>
+
+  <h3>三　停頓寫在腳本裡</h3>
+  <p>每句的 <code>pad</code>。用 Edge TTS 當備援時另外調語速與音高（<code>--rate=-14% --pitch=-6Hz</code>）。混音比例：音樂 −14 dB、音效 −18 dB（相對旁白），整體 −16 LUFS。</p>
+
+  <h3>破音字：不能用一般語音辨識回頭檢查</h3>
+  <div class="key hot">
+    <span class="lbl">為什麼不用 Whisper 檢查</span>
+    <p>它有很強的語言模型，會把唸錯聲調的字<b>猜回</b>正確的字——唸成「重新<b>踩</b>」也會寫成「重新猜」，所以抓不到錯。</p>
+  </div>
+  <p>解法是用<b>沒有語言模型的 CTC 模型</b>，逐格輸出實際聽到的音：</p>
+  <ol>
+    <li>兩個離線 CTC 模型各辨識一次（sherpa-onnx 的 zipformer-ctc-zh 與 SenseVoice），互相印證</li>
+    <li>辨識結果與旁白都轉成帶聲調拼音（pypinyin），逐字對齊</li>
+    <li>兩個模型都聽成別的音 → 判「讀錯」；只有一個不同 → 「待確認」</li>
+    <li><b>平翹舌不分（zh/z、ch/c、sh/s）不算錯</b>，那是台灣口音的常態</li>
+  </ol>
+  <p>送去配音的文字可以用<b>同音字繞過</b>唸錯（「手繪」→「手慧」），但比對時<b>以字幕的讀音為準</b>——觀眾聽到的要和字幕一致。</p>
+  <p class="note">實績：抓到「猜→踩」「手→受」「繪→回」「幾幕→繼母」「報→寶」。醫療名詞特別容易中：鞘、瘜、嚥、賁、咳。需要 <code>pip install sherpa-onnx pypinyin</code>，模型約 400 MB。</p>
+
+  <div class="key">
+    <span class="lbl">一條鐵律</span>
+    <p><b>AI 無法驗收聲音：每次改配音都要人聽。</b>這是整個流程裡唯一機器不能代你驗收的一步。</p>
+  </div>
+
+  <h3>操作坑：下載到上一段的檔案</h3>
+  <p>網頁版語音工具按 Run 不一定真的跑起來，這時下載會拿到上一段的檔案。對策：下載前先確認播放器總長和上一段不同（<code>document.querySelector('audio').duration</code>，生成中會是 <code>0.04</code>），檔案入庫後再比對 sha256，相同就是抓錯。另外三段要在<b>同一個前景分頁</b>依序錄，背景分頁收不到點擊。</p>
+</section>
+
+<section id="timeline">
+  <h2><span class="n">04</span>時間軸：全片不寫死任何秒數</h2>
+  <p>配音完成後用語音對齊取得每一句、每一個詞的實際時間，寫成一個檔案：</p>
+  <pre><code>// build/timeline.json（對齊後自動產生）
+"lines": [
+  { "id":"n06", "start": 40.6, "scene":"heart" },
+  { "id":"n07", "start": 43.6, "scene":"heart" },
+  { "id":"n08", "start": 47.3, "scene":"heart" }
+]</code></pre>
+  <p>畫面、字幕、音效、配樂的時間點<b>全部從這個檔案讀</b>。程式裡沒有一個寫死的秒數。</p>
+
+  <h3>程式怎麼把它變成影片</h3>
+  <p>影片就是每秒 30 張圖。5 分鐘 = 9000 張。程式不「畫動作」，它回答一個問題：<em>第 t 秒這一格長什麼樣？</em></p>
+  <ul>
+    <li>畫面本身是一張網頁，渲染器逐格把它輸出成圖</li>
+    <li>某個字要在第 40.6 秒出現？程式去時間軸查，自己算出這一格該不該出現、出現到什麼程度</li>
+    <li>9000 格跑完接起來，就是影片。全片渲染 15–20 分鐘</li>
+  </ul>
+  <div class="key">
+    <span class="lbl">這是整套流程能一直改下去的唯一原因</span>
+    <p>腳本改一句 → 重跑兩個指令 → 整片自動對齊，包括字幕、音效、配樂。手動剪輯的話，插一句話要重排後面所有東西——所以第一版做完通常就定型了。</p>
+  </div>
+  <p class="note">動畫事件綁在「line id ＋ 詞」上（例：<code>s03:每天</code>），主要變化發生在該詞唸出的 ±0.2 秒內。另一條硬規則：<b>畫面不可比旁白早出現</b>。</p>
+</section>
+
+<section id="art">
+  <h2><span class="n">05</span>生圖：三個固定做法</h2>
+  <ul>
+    <li><b>畫風前綴</b>——每張圖的提示詞開頭貼同一段風格描述，整片視覺才統一。</li>
+    <li><b>角色設定卡</b>——有角色出場就貼該角色的固定描述，並要求「保持完全相同」。同角色的後續姿勢要在<b>同一個對話裡續生</b>，衣著每次寫明。</li>
+    <li><b>貼圖集</b>——同一場要很多小元件時，不要一張圖生一個。改成一張 2752×1536 的綠底圖排成格狀，下載後由程式依連通區域切件去背。一張可放 12–20 個，省掉大半生圖額度。</li>
+  </ul>
+  <p>流程：綠底姿勢圖 → 放大 ×4 → 同框去背 → 存成零件。</p>
+  <p class="note">坑：生圖工具的「下載原尺寸」對續生圖會回傳最早那張；改用頁面覆蓋原圖擷取，再放大。</p>
+  <p><b>先做畫風測試再量產</b>：同一個場景請它畫 2–3 種風格各一張，選定後才開始。角色細節多交給 AI 畫；曲線和數據要準，交給程式畫。</p>
+</section>
+
+<section id="motion">
+  <h2><span class="n">06</span>動畫五層：運動與揭露最常被跳過</h2>
+  <div class="tw"><table>
+    <thead><tr><th>層</th><th>內容</th></tr></thead>
+    <tbody>
+      <tr><td>⑤ 風格</td><td>手繪／水墨／拼貼／檔案／扁平</td></tr>
+      <tr><td>④ 鏡頭</td><td>推拉搖移、長卷平移、視差、焦點引導</td></tr>
+      <tr><td>③ <b>揭露</b></td><td>遮罩推進、路徑描繪、錯開、形變、溶接</td></tr>
+      <tr><td>② <b>運動</b></td><td>預備、跟隨、重疊、弧線、擠壓、次要運動</td></tr>
+      <tr><td>① 時間</td><td>緩動、彈簧、節奏、與旁白同步</td></tr>
+    </tbody>
+  </table></div>
+  <div class="key hot">
+    <span class="lbl">第②③層最決定成敗，也最常被跳過</span>
+    <p>只有淡入和線性位移的畫面，<b>不管美術多好都會被看成投影片</b>。</p>
+  </div>
+
+  <h3>揭露層解開的死結</h3>
+  <div class="key cold">
+    <p>手繪動畫<b>不是用程式畫出來的</b>。先準備一張完整的圖（AI 生圖或手繪都可以），再用遮罩控制它出現的順序與方向，筆尖跟著遮罩邊緣走。</p>
+    <p><b>細節在圖裡，動畫在遮罩上。</b></p>
+  </div>
+  <p>沒有筆尖的遮罩推進看起來像擦窗戶。遮罩的 feather 設 0 是硬邊（紙被撕開），設大是柔邊（顯影）。</p>
+
+  <h3>鏡頭層</h3>
+  <p><b>把所有章節排在同一張長卷上，讓鏡頭滑過去。</b>一張一張切是翻投影片；鏡頭在同一個世界裡移動，觀眾才有「我們在前進」的感覺。</p>
+  <ul>
+    <li><b>視差</b>：背景 .85、中景 .5、主體 0。沒有視差的橫移不管畫多好都是平的。</li>
+    <li><b>章節交接</b>不能直接平移（像在拖一張大圖），中間要先拉遠再推回，才像鏡頭飛過去。</li>
+    <li><b>焦點引導</b>：旁白在講左邊那個東西時，鏡頭偏一點過去就夠，不必整個飛過去。</li>
+    <li>長卷的間隔必須大於畫面寬，否則相鄰章節穿幫。</li>
+  </ul>
+
+  <h3>運動層常用的函數</h3>
+  <div class="tw"><table>
+    <thead><tr><th>函數</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>anticipate</code></td><td>預備動作。要往右走之前先往左縮。<b>沒有這個，所有運動都像瞬移</b></td></tr>
+      <tr><td><code>spring</code></td><td>物理彈簧。比任何曲線都自然，因為有質量</td></tr>
+      <tr><td><code>stagger</code></td><td>錯開。一群東西不要同時進場</td></tr>
+      <tr><td><code>arc</code></td><td>弧線路徑。真實的移動不走直線</td></tr>
+      <tr><td><code>hold</code></td><td>進場→停留→離場。<b>很多人只寫進場忘了離場</b></td></tr>
+      <tr><td><code>settle</code></td><td>次要運動。主體停了，布料／紙張邊緣還在晃</td></tr>
+      <tr><td><code>breathe</code></td><td>永不停止的細微起伏，讓靜止的畫面不死。幅度 1–2%</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="rules">
+  <h2><span class="n">07</span>判例準則：規則＋判例＋自檢問題</h2>
+  <p>寫法是<b>三者缺一不可</b>。規則可以有意識違反，但每次違反要寫明理由。編號發布後不重排，只追加（R 節奏／Q 畫面／T 文字／S 聲音／P 流程／C 鏡頭）。</p>
+  <p class="note">自檢問題全是白話——<b>術語是 agent 的事，自檢問題是你的事</b>。</p>
+
+  <div class="rule">
+    <span class="id">R1</span>
+    <h4>勻速運動讀作廉價 PPT</h4>
+    <dl>
+      <dt>規則</dt><dd>飛入、滾動、位移一律用非線性緩動；一群元素入場要「越來越快」，最好綁一個物理隱喻（發牌、骨牌、落葉）。</dd>
+      <dt>判例</dt><dd>某專案連續四版畫面被評為「只是投影片」，根因不是美術而是運動——所有東西都是透明度 0→1 加線性位移。</dd>
+      <dt>自檢</dt><dd>畫面上有沒有任何元素在做勻速直線運動？批次入場是否越來越快？</dd>
+    </dl>
+  </div>
+
+  <div class="rule">
+    <span class="id">R2</span>
+    <h4>關鍵資訊落定後必須呼吸，至少靜止 1 秒</h4>
+    <dl>
+      <dt>規則</dt><dd>承載資訊的元素（標題、數字、圖表全貌）落定後靜止 ≥1s 再切。呼吸給重點，不要隨手給普通元素。</dd>
+      <dt>自檢</dt><dd>每個「想讓觀眾記住的畫面」有沒有完整的靜止時刻？</dd>
+    </dl>
+  </div>
+
+  <div class="rule">
+    <span class="id">R3</span>
+    <h4>節奏寧慢勿快，初版預設放慢一檔</h4>
+    <dl>
+      <dt>規則</dt><dd>主體動作弧（聚焦→移動→歸位）至少 3 秒；模擬真實操作按人真實的速度；排時間線時預留停頓預算。</dd>
+      <dt>判例</dt><dd>全片<b>六次</b>獨立回饋<b>全部</b>指向「放慢／停留」，<b>從未有一次「太慢了」</b>。</dd>
+      <dt>自檢</dt><dd>把每個鏡頭當第一次看——哪裡沒看清？</dd>
+    </dl>
+  </div>
+
+  <div class="rule">
+    <span class="id">R4</span>
+    <h4>一種手法全片只當一次主角</h4>
+    <dl>
+      <dt>規則</dt><dd>飛入、堆疊、翻頁、暈開，每種手法全片只能當一次主角；同一素材或同一資訊只出現一次，重複即刪。</dd>
+      <dt>自檢</dt><dd>有沒有兩個鏡頭在用同一種手法當主角、或講同一件事？</dd>
+    </dl>
+  </div>
+
+  <h3>鏡頭（C）與畫面（Q）的主要條目</h3>
+  <ul>
+    <li><b>C1</b> 運鏡有預算，超過就是在晃</li>
+    <li><b>C2</b> 推近倍率低於 1.25× 讀作晃動</li>
+    <li><b>C3</b> 推近的終點<b>必須是一個說得出名字的東西</b></li>
+    <li><b>C4</b> 相鄰兩幕不同景別，但不跳級</li>
+    <li><b>C5</b> 結尾回到全景，不停在推近狀態</li>
+    <li><b>C6</b> 每一幀都要能當封面</li>
+    <li><b>C7</b> 視線引導線就是鏡頭動線</li>
+    <li><b>Q1</b> 開場只給一個主角　<b>Q2</b> 鏡頭要穩，預設不加手持抖動</li>
+    <li><b>Q3</b> 光效寧缺勿濫：不群發，一鏡最多給主角一次</li>
+    <li><b>Q4</b> 精細不等於擁擠：每個元素都要有理由</li>
+    <li><b>Q5</b> 元素落定要有真實位置，不懸浮</li>
+  </ul>
+  <p class="note">格式與多數條目改寫自 video-shotcraft（Apache-2.0）的 aesthetic-rules，只收與題材無關的條目。</p>
+</section>
+
+<section id="qc">
+  <h2><span class="n">08</span>檢查：機器只擋「一定錯」的</h2>
+  <h3>必修（會擋住，不能出片）</h3>
+  <ul>
+    <li>規格、片長</li>
+    <li>整體音量（目標 −16 LUFS）、峰值爆音（dBTP）</li>
+    <li><b>非預期</b>的黑畫面——會自動扣掉刻意的黑：冷開場、章節黑幕、燈滅、片尾</li>
+    <li>缺圖</li>
+    <li>字幕超過兩行、字幕行首是標點</li>
+    <li>排版四項：重疊、超出安全框、壓到字幕區、文字超出卡片、字級小於 28px</li>
+  </ul>
+  <h3>建議（只列出來，由人決定）</h3>
+  <p>同一鏡頭停太久、鏡頭太短、字幕每秒字數可能讀不完、音效庫缺檔。</p>
+
+  <h3>只有人看得出來的十四項</h3>
+  <p>圖示一看就懂（否則改文字）、元素不重疊不出框不壓字幕、方向（角色朝向＝移動方向、同段航向一致）、角色外觀與年齡一致、<b>道具合乎時代（中式油燈不要阿拉丁燈）</b>、旁白與畫面一致、同畫面不停太久、斷句、轉折有鋪陳、段落留白、空間關係、字幕斷行、台語發音、音樂不蓋旁白、<b>角色是否容易被誤認（新妻與前妻服裝要區隔）</b>。</p>
+
+  <h3>驗收問的那一句</h3>
+  <div class="key">
+    <p>每句中點圖用<b>全尺寸</b>逐張看，逐張回答：<em>只看畫面、不聽旁白，新手知道這在講什麼嗎？</em></p>
+    <p>總覽縮圖只用來看結構，看不出字距與小重疊。<b>沒有配字、新手一看不懂的圖示，一律不用。</b></p>
+  </div>
+
+  <h3>一個寫、一個看</h3>
+  <p>寫程式的 AI 開不了瀏覽器，看不到自己做出來的畫面。所以分成兩個角色：一個寫程式，另一個輸出截圖、逐張檢查，再寫下一輪的修正單。你只看最後的總覽圖和影片。</p>
+
+  <h3>停損</h3>
+  <p>每輪只修必修＋使用者點名的問題；建議累積到下一版；<b>兩輪內無必修即完成</b>。新坑出現才加檢查，不預先加。</p>
+</section>
+
+<section id="spec">
+  <h2><span class="n">09</span>視覺規格（扁平風為例）</h2>
+  <ul>
+    <li>零件至少三層：底色漸層、暗面、高光；主角零件有柔和外光暈</li>
+    <li>主體佔畫面 50–70%</li>
+    <li>顏色固定編碼，而且<b>同時搭配形狀或文字，照顧色盲</b>；優先藍／橘，避免紅／綠</li>
+    <li>新名詞出現時浮出小標籤：<b>縮寫 56px ＋ 中文 40px ＋ 一句白話 30px</b></li>
+    <li>一個畫面只介紹一個新詞；第二次出現再提醒一次</li>
+    <li>畫面文字只放名詞標籤、圖表軸與數值、選項、一兩個字的圖示標註；<b>不重複旁白句子</b></li>
+    <li>鏡頭最短 1.2 秒，同場換景別用硬切</li>
+    <li>同一畫面不要靜止超過約 4 秒；持續有微動</li>
+    <li>指引定義用「指引原文卡」樣式並標出處（Box／頁碼），與例子分開呈現</li>
+    <li>輸出 1080p 30fps，另出 720p 預覽</li>
+  </ul>
+  <p class="note">舞台用漸層＋漂浮光點，不畫寫實背景，不要方框面板。</p>
+</section>
+
+<section id="styles">
+  <h2><span class="n">10</span>風格包：依題材六選一</h2>
+  <div class="tw"><table>
+    <thead><tr><th>風格</th><th>適合題材</th><th>畫面來源</th><th>成本</th></tr></thead>
+    <tbody>
+      <tr><td><b>多層紙雕</b></td><td>民間故事、傳說、歷史人物、溫情或懸疑敘事</td><td>AI 生圖</td><td>高（20–30 張）</td></tr>
+      <tr><td><b>拼貼解說</b></td><td>歷史脈絡、科普、制度政策、醫藥知識</td><td>AI 海報＋程式疊字</td><td>中高</td></tr>
+      <tr><td><b>簡筆漫畫</b></td><td>搞笑短劇、醫院日常、衛教梗</td><td><b>純程式</b></td><td>低</td></tr>
+      <tr><td><b>皮影戲</b></td><td>台灣民間故事、神怪、廟會、兒童故事</td><td><b>純程式</b></td><td>低–中</td></tr>
+      <tr><td><b>資訊圖表</b></td><td>數據、流程、藥物機轉、衛教步驟、比較</td><td><b>純程式</b></td><td>低</td></tr>
+      <tr><td><b>檔案桌面</b></td><td>有真實史料的地方史、產業史、人物史</td><td>公開授權史料</td><td>低</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>三種是純程式，完全不花生圖額度。</b>要氛圍與場景質感選紙雕或拼貼；要講清楚知識、步驟、數據選資訊圖表或拼貼；要量產、預算低選簡筆漫畫。可以混搭，但一支片最多兩種，切換點放在章節黑幕。</p>
+</section>
+
+<section id="pits">
+  <h2><span class="n">11</span>四個踩過的坑</h2>
+
+  <h3>一　配音有雜音，問題不在 AI</h3>
+  <p><b>現象</b>：每句開頭一聲爆音，結尾一段滿格雜訊。<br>
+  <b>原因</b>：回傳的音檔尾端附了一段來源驗證的中繼資料，而寫檔程式把<b>整個回傳內容</b>當成音訊樣本寫出去。<br>
+  <b>對策</b>：解析出真正的音訊段落重寫。十四個檔案無損修復，沒有重新呼叫 API，發音語氣完全沒變。</p>
+  <div class="key hot"><p>聽起來像 AI 不穩，常常是<b>自己的寫檔那一步</b>。</p></div>
+
+  <h3>二　字幕斷行</h3>
+  <p>長句在最接近中間的標點後斷兩行；兩行長度平均，不留一兩個字；英文不斷字；中文行首不能是標點。人工看很累，所以寫成機器必修項。</p>
+
+  <h3>三　方向與角色一致</h3>
+  <p>角色朝向＝移動方向；同一段航程方向要一致；後續畫面在原對話裡續生並要求保持完全相同。不一致時，觀眾覺得怪但說不出哪裡怪。</p>
+
+  <h3>四　額度與成本</h3>
+  <p>額度用盡會鎖住同一帳單下<b>所有</b>金鑰。對策：貼圖集省生圖額度；配音有快取（以「句子 id ＋文字雜湊」命名，稿子沒改不重打 API，改台詞會自動重生）；長時間渲染排到背景跑。</p>
+  <p class="note">快取只看 id 不看雜湊的話，改台詞會沿用舊配音，造成字幕與旁白不一致。</p>
+
+  <h3>附帶一條：改片長要連帶改前後測</h3>
+  <p>句子或停頓一改，時間軸就變，配套的前後測時間戳要跟著更新。某系列曾因此偏掉 6–14 秒。</p>
+</section>
+
+<section id="res">
+  <h2><span class="n">12</span>資源（連結與授權都查證過）</h2>
+  <h3>開瀏覽器就能用</h3>
+  <ul>
+    <li><b>Google AI Studio</b>——配音，用一段話描述語氣</li>
+    <li><a href="https://freesound.org/">Freesound</a>——免費音效。<b>搜尋時加篩選 <code>license:"Creative Commons 0"</code></b>，並記錄出處</li>
+    <li><a href="https://sutian.moe.edu.tw/zh-hant/">教育部臺灣台語常用詞辭典</a>——台語用詞與台羅拼音，附主音讀音檔</li>
+    <li><b>意傳</b> <code>hapsing.ithuan.tw/bangtsam?taibun=&lt;台羅&gt;</code>——台語語音線上試聽。<b>必須帶 taibun 參數</b>，根目錄打不開</li>
+  </ul>
+  <h3>想做更好再看</h3>
+  <div class="tw"><table>
+    <thead><tr><th>專案</th><th>做什麼</th><th>授權</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://github.com/Vincentwei1021/video-shotcraft">video-shotcraft</a></td><td>運鏡與節奏的判例準則，第 07 節就改寫自它</td><td>Apache-2.0</td></tr>
+      <tr><td><a href="https://github.com/FW1201/code-animation-explainer">code-animation-explainer</a></td><td>同類型工具：腳本分鏡、提示詞、字幕對齊、讀音檢核</td><td>MIT</td></tr>
+      <tr><td><a href="https://github.com/geeklee/srt-whiteboard-animation">srt-whiteboard-animation</a></td><td>遮罩分區＋連續筆跡的白板手繪動畫</td><td>MIT</td></tr>
+      <tr><td><a href="https://github.com/mtkresearch/BreezyVoice">BreezyVoice</a></td><td>聯發科研究院的本機台灣華語語音模型</td><td>Apache-2.0</td></tr>
+      <tr><td><a href="https://github.com/lucide-icons/lucide">Lucide</a></td><td>免費圖示庫與線條規格</td><td>ISC</td></tr>
+    </tbody>
+  </table></div>
+  <h3>動畫框架的授權要自己確認</h3>
+  <p>Remotion 的免費授權涵蓋個人、員工 3 人以下的營利組織、<b>非營利組織</b>，以及評估中尚未商用者；<b>4 人以上的營利團隊需付費公司授權</b>。醫院多半屬非營利體系，但<b>各自機構性質請自行確認</b>。另：Remotion 5.0 授權條款會調整。</p>
+  <p class="note">備案：不用 Remotion 也做得到——純向量圖＋無頭瀏覽器逐格截圖，完全避開授權問題。</p>
+</section>
+
+<section id="gloss">
+  <h2><span class="n">13</span>名詞對照</h2>
+  <p>你不需要記這些詞。這張表只是讓你看到 agent 回話時知道它在講什麼。</p>
+  <div class="tw"><table>
+    <thead><tr><th>它會說</th><th>白話</th></tr></thead>
+    <tbody>
+      <tr><td>景別</td><td>鏡頭離主角多遠：遠景、中景、特寫</td></tr>
+      <tr><td>視差</td><td>橫移時遠景走得比近景慢，看起來才有深度</td></tr>
+      <tr><td>緩動</td><td>動作的加速與減速曲線。沒有它就是等速，看起來像投影片</td></tr>
+      <tr><td>遮罩推進</td><td>用一塊「看不見的布」慢慢移開，讓圖一段一段露出來</td></tr>
+      <tr><td>逐詞對時</td><td>知道每一個字是第幾秒唸出來的</td></tr>
+      <tr><td>安全框</td><td>畫面邊緣的保留區，字放進去會被切掉</td></tr>
+      <tr><td>LUFS</td><td>整支片的平均音量。−16 是常見的影片標準</td></tr>
+      <tr><td>爆音</td><td>音量瞬間衝破上限，聽起來破破的</td></tr>
+      <tr><td>台羅</td><td>台灣台語羅馬字拼音，台語的注音，語音合成看得懂</td></tr>
+      <tr><td>去背</td><td>把圖的背景拿掉，只留下角色或物件</td></tr>
+      <tr><td>貼圖集</td><td>一張圖裡排好幾個小元件，之後由程式切開</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="kit">
+  <h2><span class="n">14</span>把規則檔帶回去</h2>
+  <p>演講說的「挑範本、備資料、看片說哪裡怪」，前提是你的 agent 讀得到同一套規則。下面是公開版：已拿掉作者電腦上的路徑與帳號；作者自己的程式範本<b>沒有收錄</b>，agent 會依規則自己寫。</p>
+  <div class="key cold">
+    <span class="lbl">一次帶走</span>
+    <p><a id="kitZip" href="#"><b>下載整包（zip）</b></a>　·　<a id="kitRepo" href="#">在 GitHub 上看</a>　·　會用 git 的人：<code id="kitClone">git clone</code></p>
+  </div>
+  <p><a href="kit/README.md"><b>先讀這份說明</b></a>　·　下面每個檔名都能點開，整個資料夾照原樣放好即可。</p>
+  <div class="tw"><table>
+    <thead><tr><th>檔案</th><th>內容</th></tr></thead>
+    <tbody>
+      <tr><td><a href="kit/make-video/SKILL.md">make-video/SKILL.md</a></td><td>整套流程：開工先提案、內容查證、腳本、配音、時間軸、分鏡、檢查、看片修改</td></tr>
+      <tr><td><a href="kit/make-video/explainer-grammar.md">explainer-grammar.md</a></td><td>科普敘事文法：定義、步驟、比較、因果、分類各怎麼出場</td></tr>
+      <tr><td><a href="kit/make-video/styles/README.md">styles/README.md</a></td><td>六個風格包怎麼選、只有一個訂閱怎麼分工</td></tr>
+      <tr><td><a href="kit/make-video/template/story.example.json">template/</a></td><td>腳本、音效表、<a href="kit/make-video/template/docs/shotlist.example.md">分鏡表</a>的格式範本（林投姐）</td></tr>
+      <tr><td><a href="kit/animation-craft/SKILL.md">animation-craft/SKILL.md</a></td><td>動畫五層：時間、運動、揭露、鏡頭、風格</td></tr>
+      <tr><td><a href="kit/animation-craft/craft-rules.md">craft-rules.md</a></td><td>判例準則：規則＋判例＋自檢問題（第 07 節的完整版）</td></tr>
+      <tr><td><a href="kit/THIRD_PARTY_NOTICES.md">THIRD_PARTY_NOTICES.md</a></td><td>改寫自哪些開源專案、原作授權全文</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>怎麼用</h3>
+  <ul>
+    <li><b>Claude Code</b>：把 <code>make-video</code>、<code>animation-craft</code> 兩個資料夾放進 <code>~/.claude/skills/</code>，之後說「幫我做一支○○動畫」就會啟用。</li>
+    <li><b>其他 agent</b>：開工時說「先完整讀過這兩個資料夾的 SKILL.md，照裡面的規則做」。</li>
+  </ul>
+
+  <h3>三份照抄配方：直接貼，換掉括號</h3>
+  <p><b>A　指引導讀</b>（3–6 分，新進藥師教育訓練；範本：GINA、GOLD）</p>
+  <pre><code>把（GINA 2026 第 X 章）做成給新進藥師的 5 分鐘導讀動畫，每句旁白標出處頁碼，附 5 題前後測。先給我 3 種說故事方式和畫風，等我選。</code></pre>
+  <p><b>B　資訊圖表</b>（30 秒–3 分，新藥介紹、藥事委員會、ICU 與靜脈營養判讀訓練；範本：tarlatamab、PCSK9、酸鹼判讀）</p>
+  <pre><code>照 tarlatamab 那支的風格（無旁白資訊圖表），做（藥名／判讀流程）的短片給醫護看。只能用我給的資料裡的數字，每個數字標出處。先給我版面提案。</code></pre>
+  <p><b>C　故事片</b>（3–4 分，社區衛教劇情、台語長者、校園推廣；範本：林投姐）</p>
+  <pre><code>把（一段故事或衛教情境）做成 3 分鐘紙雕動畫，華語旁白、關鍵台詞用台語並附台羅。先給我角色設定卡、3 種說故事方式和畫風，等我選。</code></pre>
+
+  <div class="key hot">
+    <span class="lbl">一定要自己做的三件事</span>
+    <p><b>資料自己給</b>：原始來源、寫明版本、先看授權。<b>內容自己審</b>：正式使用前請第二位藥師或醫師審過。<b>聲音自己聽</b>：每次改配音都戴耳機聽一遍。</p>
+  </div>
+  <p class="note">授權：部分內容改寫自 MIT 與 Apache-2.0 授權的開源專案，原作聲明見 THIRD_PARTY_NOTICES.md。作者撰寫的部分授權條款待定；在那之前歡迎個人學習使用，轉載或修改後再發佈請先聯絡作者。</p>
+</section>
+
+</main>
+
+<footer class="foot">
+  這份手冊的內容全部來自四個實際做完的專案與其流程文件。數字與引文都可回溯到專案檔案。
+  演講簡報另見同一場次的連結。
+</footer>
+
+</div>
+
+<script>
+/* 放在 GitHub Pages（帳號.github.io/repo）時：kit 的檔案連到 GitHub 的檔案頁（會排版好、也能下載），
+   並自動算出 zip 與 clone 的網址，不必寫死帳號名。在其他地方打開時，連結維持原樣。 */
+(function(){
+  const h=location.hostname, m=h.match(/^([^.]+)\.github\.io$/i);
+  const box=document.getElementById('kitZip').closest('.key');
+  if(!m){ box.hidden=true; return; }
+  const user=m[1], seg=location.pathname.split('/').filter(Boolean)[0];
+  const repo=(seg&&!/\.html?$/i.test(seg))?seg:h;
+  const base='https://github.com/'+user+'/'+repo;
+  document.getElementById('kitZip').href=base+'/archive/refs/heads/main.zip';
+  document.getElementById('kitRepo').href=base+'/tree/main/kit';
+  document.getElementById('kitClone').textContent='git clone '+base+'.git';
+  document.querySelectorAll('a[href^="kit/"]').forEach(a=>{ a.href=base+'/blob/main/'+a.getAttribute('href'); });
+})();
+</script>
+</body></html>
